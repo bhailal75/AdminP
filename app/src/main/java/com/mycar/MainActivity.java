@@ -23,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private Uri mImageUri;
     private StorageReference mStoreageRef;
     private DatabaseReference mDatabaseRef;
+
+    private StorageTask mUploadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +65,11 @@ public class MainActivity extends AppCompatActivity {
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uploadFile();
+                if (mUploadTask != null && mUploadTask.isInProgress()){
+                    Toast.makeText(MainActivity.this, "Upload in Progress", Toast.LENGTH_SHORT).show();
+                }else {
+                    uploadFile();
+                }
             }
         });
     }
@@ -78,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         if (mImageUri != null) {
             StorageReference fileReference = mStoreageRef.child(System.currentTimeMillis()
                     + "." + getFileExtension(mImageUri));
-            fileReference.putFile(mImageUri)
+            mUploadTask = fileReference.putFile(mImageUri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
